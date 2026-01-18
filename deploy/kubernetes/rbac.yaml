@@ -1,0 +1,71 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kmeta-agent
+  namespace: kagent
+  labels:
+    app.kubernetes.io/name: kmeta-agent
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/part-of: kmeta-agent
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kmeta-agent-role
+  namespace: kagent
+  labels:
+    app.kubernetes.io/name: kmeta-agent
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/part-of: kmeta-agent
+rules:
+  # Full access to Agent resources
+  - apiGroups: ["kagent.dev"]
+    resources: ["agents"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["kagent.dev"]
+    resources: ["agents/status"]
+    verbs: ["get", "list", "watch"]
+
+  # Full access to ModelConfig resources
+  - apiGroups: ["kagent.dev"]
+    resources: ["modelconfigs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Full access to MCPServer resources
+  - apiGroups: ["kagent.dev"]
+    resources: ["mcpservers", "remotemcpservers"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Read access to secrets (for validation)
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+
+  # Ability to create RBAC resources for new agents
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "rolebindings"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Service account management
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kmeta-agent-rolebinding
+  namespace: kagent
+  labels:
+    app.kubernetes.io/name: kmeta-agent
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/part-of: kmeta-agent
+subjects:
+  - kind: ServiceAccount
+    name: kmeta-agent
+    namespace: kagent
+roleRef:
+  kind: Role
+  name: kmeta-agent-role
+  apiGroup: rbac.authorization.k8s.io

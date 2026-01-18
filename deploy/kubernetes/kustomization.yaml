@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kagent
+
+resources:
+  - rbac.yaml
+  - modelconfig.yaml
+  - mcpserver.yaml
+  - meta-agent.yaml
+
+commonLabels:
+  app.kubernetes.io/managed-by: kmeta-agent
+  app.kubernetes.io/version: "1.0.0"
+
+images:
+  - name: ghcr.io/kagent-dev/meta-kagent
+    newTag: latest

@@ -1,0 +1,22 @@
+---
+# MCPServer for KMeta-Agent tools
+# Provides tools for managing kagent resources (agents, model configs, MCP servers)
+apiVersion: kagent.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: kmeta-agent-tools
+  namespace: kagent
+  labels:
+    app.kubernetes.io/name: kmeta-agent-tools
+    app.kubernetes.io/component: mcp-server
+    app.kubernetes.io/part-of: kmeta-agent
+spec:
+  deployment:
+    image: ghcr.io/kagent-dev/meta-kagent:latest
+    cmd: /kmeta-agent-server
+    port: 3000
+    env:
+      KAGENT_NAMESPACE: kagent
+      LOG_LEVEL: info
+  transportType: stdio
+  stdioTransport: {}
