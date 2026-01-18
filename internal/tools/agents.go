@@ -52,8 +52,8 @@ func (ts *ToolServer) handleListAgents(ctx context.Context, req mcp.CallToolRequ
 			item["toolCount"] = len(agent.Spec.Declarative.Tools)
 		}
 		if includeStatus {
-			item["ready"] = agent.Status.Ready
-			item["accepted"] = agent.Status.Accepted
+			item["ready"] = agent.Status.IsReady()
+			item["accepted"] = agent.Status.IsAccepted()
 		}
 		result = append(result, item)
 	}

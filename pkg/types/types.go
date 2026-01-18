@@ -60,9 +60,38 @@ type Skill struct {
 
 // AgentStatus defines the observed state of an Agent.
 type AgentStatus struct {
-	Ready    bool   `json:"ready,omitempty"`
-	Accepted bool   `json:"accepted,omitempty"`
-	Message  string `json:"message,omitempty"`
+	Conditions         []Condition `json:"conditions,omitempty"`
+	ObservedGeneration int64       `json:"observedGeneration,omitempty"`
+}
+
+// Condition represents a status condition.
+type Condition struct {
+	Type               string `json:"type,omitempty"`
+	Status             string `json:"status,omitempty"` // "True", "False", "Unknown"
+	Reason             string `json:"reason,omitempty"`
+	Message            string `json:"message,omitempty"`
+	LastTransitionTime string `json:"lastTransitionTime,omitempty"`
+	ObservedGeneration int64  `json:"observedGeneration,omitempty"`
+}
+
+// IsReady returns true if the agent has a Ready condition with status True.
+func (s *AgentStatus) IsReady() bool {
+	for _, c := range s.Conditions {
+		if c.Type == "Ready" && c.Status == "True" {
+			return true
+		}
+	}
+	return false
+}
+
+// IsAccepted returns true if the agent has an Accepted condition with status True.
+func (s *AgentStatus) IsAccepted() bool {
+	for _, c := range s.Conditions {
+		if c.Type == "Accepted" && c.Status == "True" {
+			return true
+		}
+	}
+	return false
 }
 
 // AgentList contains a list of Agents.
