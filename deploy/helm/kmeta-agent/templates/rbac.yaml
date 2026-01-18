@@ -1,15 +1,14 @@
-# Note: ServiceAccount is auto-created by kagent controller from MCPServer (kmeta-agent-tools)
+{{- if .Values.rbac.create -}}
+# Note: ServiceAccount is auto-created by kagent controller from MCPServer
 # We only need to create the Role and bind it to the auto-created SA
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: kmeta-agent-role
-  namespace: kagent
+  name: {{ include "kmeta-agent.fullname" . }}-role
+  namespace: {{ .Values.namespace }}
   labels:
-    app.kubernetes.io/name: kmeta-agent
-    app.kubernetes.io/component: rbac
-    app.kubernetes.io/part-of: kmeta-agent
+    {{- include "kmeta-agent.rbacLabels" . | nindent 4 }}
 rules:
   # Full access to Agent resources
   - apiGroups: ["kagent.dev"]
@@ -47,18 +46,17 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: kmeta-agent-rolebinding
-  namespace: kagent
+  name: {{ include "kmeta-agent.fullname" . }}-rolebinding
+  namespace: {{ .Values.namespace }}
   labels:
-    app.kubernetes.io/name: kmeta-agent
-    app.kubernetes.io/component: rbac
-    app.kubernetes.io/part-of: kmeta-agent
+    {{- include "kmeta-agent.rbacLabels" . | nindent 4 }}
 subjects:
   # Bind to the ServiceAccount auto-created by kagent controller for the MCPServer
   - kind: ServiceAccount
-    name: kmeta-agent-tools
-    namespace: kagent
+    name: {{ .Values.mcpServer.name }}
+    namespace: {{ .Values.namespace }}
 roleRef:
   kind: Role
-  name: kmeta-agent-role
+  name: {{ include "kmeta-agent.fullname" . }}-role
   apiGroup: rbac.authorization.k8s.io
+{{- end }}

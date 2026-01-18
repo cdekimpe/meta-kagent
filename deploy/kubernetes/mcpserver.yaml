@@ -12,7 +12,8 @@ metadata:
     app.kubernetes.io/part-of: kmeta-agent
 spec:
   deployment:
-    image: ghcr.io/kagent-dev/meta-kagent:latest
+    # Set to your container registry image
+    image: ghcr.io/yourusername/meta-kagent:latest
     cmd: /kmeta-agent-server
     port: 3000
     env:

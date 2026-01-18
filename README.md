@@ -24,28 +24,36 @@ KMeta-Agent is itself a kagent agent that provides tools for managing kagent res
 
 - Kubernetes cluster with kagent installed
 - `kubectl` configured to access your cluster
-- OpenAI API key (or another supported LLM provider)
+- `helm` v3+ installed
+- Docker for building the image
 
-### Deploy KMeta-Agent
+KMeta-Agent uses your platform's existing ModelConfig (e.g., `default-model-config`), so no additional API keys are required.
 
-1. **Create the API key secret:**
+### Quick Start
+
+1. **Build and push the image to your container registry:**
 
 ```bash
-kubectl create secret generic kmeta-agent-llm-secret \
-  --namespace kagent \
-  --from-literal=OPENAI_API_KEY=your-api-key-here
+# Set your container registry
+export IMAGE_REPO=ghcr.io/yourusername
+
+# Build and push
+make docker-release
 ```
 
-2. **Deploy the manifests:**
+2. **Deploy with Helm:**
 
 ```bash
-kubectl apply -k deploy/kubernetes/
+helm install kmeta-agent deploy/helm/kmeta-agent/ \
+  --namespace kagent \
+  --set mcpServer.image.repository=ghcr.io/yourusername/meta-kagent
 ```
 
 3. **Verify the deployment:**
 
 ```bash
-kubectl get agents,modelconfigs,mcpservers -n kagent -l app.kubernetes.io/part-of=kmeta-agent
+kubectl get agents,mcpservers -n kagent -l app.kubernetes.io/name=kmeta-agent
+kubectl get pods -n kagent -l app.kubernetes.io/name=kmeta-agent-tools
 ```
 
 ## Usage
@@ -119,6 +127,30 @@ KMeta-Agent: Applied successfully! The prometheus-assistant agent is now created
 | `diff_manifest` | Show diff against current state |
 | `apply_manifest` | Apply a manifest to the cluster |
 
+## Configuration
+
+### Using a Different ModelConfig
+
+KMeta-Agent uses the platform's existing ModelConfig. To use a different one:
+
+```bash
+# List available ModelConfigs
+kubectl get modelconfigs -n kagent
+
+# Install with a specific ModelConfig
+helm install kmeta-agent deploy/helm/kmeta-agent/ \
+  --namespace kagent \
+  --set modelConfig.name=your-model-config \
+  --set mcpServer.image.repository=ghcr.io/yourusername/meta-kagent
+```
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `KAGENT_NAMESPACE` | Namespace to manage | `kagent` |
+| `LOG_LEVEL` | Log level (debug, info, warn, error) | `info` |
+
 ## Development
 
 ### Building from Source
@@ -134,7 +166,7 @@ make build
 make test
 
 # Build Docker image
-make docker-build
+make docker-build IMAGE_REPO=ghcr.io/yourusername
 ```
 
 ### Project Structure
@@ -148,7 +180,9 @@ meta-kagent/
 │   ├── tools/               # Tool implementations
 │   └── validation/          # Manifest validation
 ├── pkg/types/               # kagent CRD types
-├── deploy/kubernetes/       # K8s manifests
+├── deploy/
+│   ├── helm/kmeta-agent/    # Helm chart (recommended)
+│   └── kubernetes/          # Kustomize manifests (legacy)
 ├── Dockerfile
 ├── Makefile
 └── README.md
@@ -161,31 +195,24 @@ meta-kagent/
 make run
 ```
 
-## Configuration
+### Makefile Targets
 
-### Environment Variables
+```bash
+make help              # Show all available targets
+make docker-release    # Build and push image
+make helm-install      # Install with Helm
+make helm-uninstall    # Uninstall with Helm
+make helm-upgrade      # Upgrade with Helm
+```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `KAGENT_NAMESPACE` | Namespace to manage | `kagent` |
-| `LOG_LEVEL` | Log level (debug, info, warn, error) | `info` |
+## Uninstalling
 
-### Using a Different LLM Provider
+```bash
+# Using Helm
+helm uninstall kmeta-agent -n kagent
 
-Edit `deploy/kubernetes/modelconfig.yaml` to use a different provider:
-
-```yaml
-apiVersion: kagent.dev/v1alpha2
-kind: ModelConfig
-metadata:
-  name: kmeta-agent-model
-  namespace: kagent
-spec:
-  provider: Anthropic  # or Gemini, AzureOpenAI, Ollama
-  model: claude-sonnet-4-20250514
-  apiKeySecret: kmeta-agent-llm-secret
-  apiKeySecretKey: ANTHROPIC_API_KEY
-  anthropic: {}
+# Or using Makefile
+make helm-uninstall
 ```
 
 ## License

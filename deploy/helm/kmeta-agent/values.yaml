@@ -1,0 +1,49 @@
+# KMeta-Agent Helm Values
+#
+# To deploy, first build and push your image, then install:
+#   make docker-release IMAGE_REPO=ghcr.io/yourusername
+#   helm install kmeta-agent deploy/helm/kmeta-agent/ -n kagent \
+#     --set mcpServer.image.repository=ghcr.io/yourusername/meta-kagent
+
+# Namespace where the agent will be deployed
+namespace: kagent
+
+# Agent configuration
+agent:
+  name: kmeta-agent
+  description: |
+    KMeta-Agent is an agent architect that helps design, review, apply, and evolve
+    kagent agents. It provides a human-in-the-loop workflow for managing agent
+    lifecycle in Kubernetes through conversational interactions.
+
+# Model configuration - references an existing ModelConfig on the platform
+# KMeta-Agent uses whichever ModelConfig is already deployed on your kagent platform.
+# No additional API keys or secrets are required.
+modelConfig:
+  # Name of an existing ModelConfig resource to use
+  # Run `kubectl get modelconfigs -n kagent` to see available options
+  name: default-model-config
+
+# MCP Server configuration
+mcpServer:
+  name: kmeta-agent-tools
+  image:
+    # IMPORTANT: Set this to your own container registry
+    # Example: ghcr.io/yourusername/meta-kagent
+    repository: ghcr.io/yourusername/meta-kagent
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 3000
+  env:
+    KAGENT_NAMESPACE: kagent
+    LOG_LEVEL: info
+
+# Note: ServiceAccount is auto-created by kagent controller from MCPServer
+# The RBAC Role is bound to the MCPServer's auto-created SA (mcpServer.name)
+
+# RBAC configuration
+rbac:
+  create: true
+
+# Labels to add to all resources
+commonLabels: {}

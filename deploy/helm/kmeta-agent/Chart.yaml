@@ -1,0 +1,14 @@
+apiVersion: v2
+name: kmeta-agent
+description: KMeta-Agent - Human-in-the-loop agent architect for kagent
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - kagent
+  - kubernetes
+  - ai-agent
+  - mcp
+home: https://github.com/kagent-dev/meta-kagent
+maintainers:
+  - name: kagent-dev

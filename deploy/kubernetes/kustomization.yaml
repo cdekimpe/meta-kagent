@@ -5,7 +5,6 @@ namespace: kagent
 
 resources:
   - rbac.yaml
-  - modelconfig.yaml
   - mcpserver.yaml
   - meta-agent.yaml
 
@@ -13,6 +12,8 @@ commonLabels:
   app.kubernetes.io/managed-by: kmeta-agent
   app.kubernetes.io/version: "1.0.0"
 
+# Override the image - set newName to your registry
+# Example: kustomize edit set image ghcr.io/yourusername/meta-kagent=ghcr.io/youruser/meta-kagent:v1.0.0
 images:
-  - name: ghcr.io/kagent-dev/meta-kagent
+  - name: ghcr.io/yourusername/meta-kagent
     newTag: latest

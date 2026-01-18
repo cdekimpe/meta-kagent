@@ -1,0 +1,19 @@
+---
+apiVersion: kagent.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: {{ .Values.mcpServer.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "kmeta-agent.mcpServerLabels" . | nindent 4 }}
+spec:
+  deployment:
+    image: {{ .Values.mcpServer.image.repository }}:{{ .Values.mcpServer.image.tag }}
+    cmd: /kmeta-agent-server
+    port: {{ .Values.mcpServer.port }}
+    {{- with .Values.mcpServer.env }}
+    env:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  transportType: stdio
+  stdioTransport: {}

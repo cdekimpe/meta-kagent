@@ -2,7 +2,9 @@
 
 # Variables
 BINARY_NAME := kmeta-agent-server
-IMAGE_NAME := ghcr.io/kagent-dev/meta-kagent
+# Set your container registry - override with: make docker-build IMAGE_REPO=ghcr.io/yourusername
+IMAGE_REPO ?= ghcr.io/yourusername
+IMAGE_NAME := $(IMAGE_REPO)/meta-kagent
 VERSION ?= latest
 GO := go
 GOFLAGS := -v
@@ -11,8 +13,9 @@ LDFLAGS := -s -w
 # Directories
 BUILD_DIR := bin
 CMD_DIR := cmd/mcp-server
+HELM_CHART := deploy/helm/kmeta-agent
 
-.PHONY: all build clean test lint fmt docker-build docker-push deploy undeploy help
+.PHONY: all build clean test lint fmt docker-build docker-push deploy undeploy helm-install helm-uninstall help
 
 # Default target
 all: build
@@ -87,7 +90,24 @@ docker-push:
 # Build and push
 docker-release: docker-build docker-push
 
-## Kubernetes targets
+## Helm targets
+
+# Install with Helm
+helm-install:
+	@echo "Installing with Helm..."
+	helm install kmeta-agent $(HELM_CHART) -n kagent --set mcpServer.image.repository=$(IMAGE_NAME)
+
+# Uninstall with Helm
+helm-uninstall:
+	@echo "Uninstalling with Helm..."
+	helm uninstall kmeta-agent -n kagent
+
+# Upgrade with Helm
+helm-upgrade:
+	@echo "Upgrading with Helm..."
+	helm upgrade kmeta-agent $(HELM_CHART) -n kagent --set mcpServer.image.repository=$(IMAGE_NAME)
+
+## Kubernetes targets (Kustomize - legacy)
 
 # Deploy to Kubernetes
 deploy:
@@ -158,6 +178,11 @@ help:
 	@echo "  run            Run locally"
 	@echo "  run-debug      Run with debug logging"
 	@echo ""
+	@echo "Helm targets:"
+	@echo "  helm-install   Install with Helm"
+	@echo "  helm-uninstall Uninstall with Helm"
+	@echo "  helm-upgrade   Upgrade with Helm"
+	@echo ""
 	@echo "Variables:"
+	@echo "  IMAGE_REPO     Container registry (default: ghcr.io/yourusername)"
 	@echo "  VERSION        Image tag (default: latest)"
-	@echo "  IMAGE_NAME     Docker image name"

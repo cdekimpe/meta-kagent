@@ -16,7 +16,7 @@ spec:
     lifecycle in Kubernetes through conversational interactions.
   type: Declarative
   declarative:
-    modelConfig: kmeta-agent-model
+    modelConfig: default-model-config
     systemMessage: |
       # KMeta-Agent: Agent Architect for kagent
 
@@ -199,6 +199,7 @@ spec:
       - type: McpServer
         mcpServer:
           name: kmeta-agent-tools
+          apiGroup: kagent.dev
           kind: MCPServer
           toolNames:
             - list_agents

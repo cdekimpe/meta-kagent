@@ -1,0 +1,35 @@
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: {{ .Values.agent.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "kmeta-agent.agentLabels" . | nindent 4 }}
+spec:
+  description: {{ .Values.agent.description | quote }}
+  type: Declarative
+  declarative:
+    modelConfig: {{ .Values.modelConfig.name }}
+    systemMessage: |
+      {{- .Files.Get "system-prompt.txt" | nindent 6 }}
+    tools:
+      - type: McpServer
+        mcpServer:
+          name: {{ .Values.mcpServer.name }}
+          apiGroup: kagent.dev
+          kind: MCPServer
+          toolNames:
+            - list_agents
+            - get_agent
+            - create_agent_manifest
+            - update_agent_manifest
+            - delete_agent
+            - list_model_configs
+            - create_model_config_manifest
+            - list_mcp_servers
+            - create_mcp_server_manifest
+            - generate_rbac_manifest
+            - validate_manifest
+            - apply_manifest
+            - diff_manifest
