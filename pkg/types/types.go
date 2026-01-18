@@ -26,6 +26,7 @@ type DeclarativeSpec struct {
 	ModelConfig   string     `json:"modelConfig,omitempty"`
 	SystemMessage string     `json:"systemMessage,omitempty"`
 	Tools         []ToolSpec `json:"tools,omitempty"`
+	A2AConfig     *A2AConfig `json:"a2aConfig,omitempty"`
 }
 
 // ToolSpec defines a tool reference.
@@ -56,6 +57,43 @@ type Skill struct {
 	OutputModes []string `json:"outputModes,omitempty"`
 	Tags        []string `json:"tags,omitempty"`
 	Examples    []string `json:"examples,omitempty"`
+}
+
+// AgentCard represents the A2A Agent Card for discovery (per A2A protocol spec).
+// This is generated from an Agent resource, not stored in the CRD.
+type AgentCard struct {
+	AgentID          string                    `json:"agentId"`
+	Name             string                    `json:"name"`
+	Description      string                    `json:"description,omitempty"`
+	URL              string                    `json:"url,omitempty"`
+	ProtocolVersions []string                  `json:"protocolVersions,omitempty"`
+	Provider         *AgentProvider            `json:"provider,omitempty"`
+	Capabilities     *AgentCapabilities        `json:"capabilities,omitempty"`
+	Skills           []Skill                   `json:"skills,omitempty"`
+	SecuritySchemes  map[string]SecurityScheme `json:"securitySchemes,omitempty"`
+	Security         []string                  `json:"security,omitempty"`
+}
+
+// AgentProvider describes the provider/creator of an agent.
+type AgentProvider struct {
+	Name        string `json:"name,omitempty"`
+	URL         string `json:"url,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+// AgentCapabilities describes what features an A2A agent supports.
+type AgentCapabilities struct {
+	Streaming         bool `json:"streaming,omitempty"`
+	PushNotifications bool `json:"pushNotifications,omitempty"`
+}
+
+// SecurityScheme defines an authentication method (per A2A spec).
+type SecurityScheme struct {
+	Type        string `json:"type,omitempty"`   // "apiKey", "http", "oauth2"
+	In          string `json:"in,omitempty"`     // "header", "query" (for apiKey)
+	Name        string `json:"name,omitempty"`   // Header/param name
+	Scheme      string `json:"scheme,omitempty"` // "bearer", "basic" (for http)
+	Description string `json:"description,omitempty"`
 }
 
 // AgentStatus defines the observed state of an Agent.

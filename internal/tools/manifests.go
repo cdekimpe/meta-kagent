@@ -187,6 +187,100 @@ func (ts *ToolServer) validateAgent(ctx context.Context, obj *unstructured.Unstr
 		}
 	}
 
+	// Validate A2A config if present
+	a2aConfig, found, _ := unstructured.NestedMap(obj.Object, "spec", "a2aConfig")
+	if found && a2aConfig != nil {
+		issues = append(issues, ts.validateA2AConfig(ctx, a2aConfig, strict)...)
+	}
+
+	return issues
+}
+
+func (ts *ToolServer) validateA2AConfig(ctx context.Context, config map[string]interface{}, strict bool) []ValidationIssue {
+	var issues []ValidationIssue
+
+	skills, found, _ := unstructured.NestedSlice(config, "skills")
+	if !found || len(skills) == 0 {
+		// A2A config without skills is just informational
+		return issues
+	}
+
+	seenIDs := make(map[string]bool)
+
+	for i, skill := range skills {
+		skillMap, ok := skill.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		// Validate skill ID
+		id, _, _ := unstructured.NestedString(skillMap, "id")
+		if id == "" {
+			issues = append(issues, ValidationIssue{
+				Severity: "error",
+				Field:    fmt.Sprintf("spec.a2aConfig.skills[%d].id", i),
+				Message:  "skill id is required",
+			})
+		} else {
+			// Check for duplicate IDs
+			if seenIDs[id] {
+				issues = append(issues, ValidationIssue{
+					Severity: "error",
+					Field:    fmt.Sprintf("spec.a2aConfig.skills[%d].id", i),
+					Message:  fmt.Sprintf("duplicate skill id '%s'", id),
+				})
+			}
+			seenIDs[id] = true
+		}
+
+		// Validate skill name
+		name, _, _ := unstructured.NestedString(skillMap, "name")
+		if name == "" {
+			issues = append(issues, ValidationIssue{
+				Severity: "error",
+				Field:    fmt.Sprintf("spec.a2aConfig.skills[%d].name", i),
+				Message:  "skill name is required",
+			})
+		}
+
+		// Validate skill description
+		desc, _, _ := unstructured.NestedString(skillMap, "description")
+		if desc == "" {
+			issues = append(issues, ValidationIssue{
+				Severity: "error",
+				Field:    fmt.Sprintf("spec.a2aConfig.skills[%d].description", i),
+				Message:  "skill description is required",
+			})
+		} else if strict && len(desc) < 20 {
+			issues = append(issues, ValidationIssue{
+				Severity: "warning",
+				Field:    fmt.Sprintf("spec.a2aConfig.skills[%d].description", i),
+				Message:  "skill description seems short; consider providing more detail for A2A discovery",
+			})
+		}
+
+		// Best practice warnings
+		if strict {
+			examples, _, _ := unstructured.NestedSlice(skillMap, "examples")
+			if len(examples) == 0 {
+				issues = append(issues, ValidationIssue{
+					Severity: "warning",
+					Field:    fmt.Sprintf("spec.a2aConfig.skills[%d].examples", i),
+					Message:  "consider adding examples to help other agents understand how to use this skill",
+				})
+			}
+
+			tags, _, _ := unstructured.NestedSlice(skillMap, "tags")
+			if len(tags) == 0 {
+				issues = append(issues, ValidationIssue{
+					Severity: "warning",
+					Field:    fmt.Sprintf("spec.a2aConfig.skills[%d].tags", i),
+					Message:  "consider adding tags to improve skill discoverability",
+				})
+			}
+		}
+	}
+
 	return issues
 }
 

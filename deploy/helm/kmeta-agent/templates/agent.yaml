@@ -20,16 +20,121 @@ spec:
           apiGroup: kagent.dev
           kind: MCPServer
           toolNames:
+            # Agent tools
             - list_agents
             - get_agent
             - create_agent_manifest
             - update_agent_manifest
             - delete_agent
+            # Model config tools
             - list_model_configs
             - create_model_config_manifest
+            # MCP server tools
             - list_mcp_servers
             - create_mcp_server_manifest
+            # RBAC tools
             - generate_rbac_manifest
+            # Manifest tools
             - validate_manifest
             - apply_manifest
             - diff_manifest
+            # A2A (Agent-to-Agent) tools
+            - list_agent_skills
+            - discover_a2a_agents
+            - get_agent_card
+            - create_skill_manifest
+            - validate_skill
+            - add_skill_to_agent
+            - remove_skill_from_agent
+    a2aConfig:
+      skills:
+      - id: agent_lifecycle_management
+        name: "Agent Lifecycle Management"
+        description: "Create, read, update, and delete kagent agents with full lifecycle management including system prompt design and tool configuration"
+        inputModes:
+          - text/plain
+          - application/json
+        outputModes:
+          - application/json
+          - application/yaml
+        tags:
+          - agents
+          - lifecycle
+          - management
+          - kubernetes
+        examples:
+          - "List all available agents in the cluster"
+          - "Create a new agent with specific capabilities"
+          - "Update an agent's system prompt or tools"
+          - "Delete an agent safely with validation"
+      - id: resource_validation_deployment
+        name: "Resource Validation & Deployment"
+        description: "Validate Kubernetes manifests for correctness and safely deploy resources with change preview and dry-run support"
+        inputModes:
+          - text/plain
+          - application/yaml
+        outputModes:
+          - text/plain
+          - application/json
+        tags:
+          - validation
+          - deployment
+          - kubernetes
+          - safety
+        examples:
+          - "Validate an agent manifest for errors"
+          - "Show differences before deploying changes"
+          - "Apply a new agent configuration with dry-run"
+      - id: a2a_skill_discovery
+        name: "A2A Skill Discovery"
+        description: "Discover and catalog A2A skills exposed by agents in the cluster, generate agent cards for service discovery"
+        inputModes:
+          - text/plain
+        outputModes:
+          - application/json
+          - application/yaml
+        tags:
+          - a2a
+          - discovery
+          - skills
+          - agents
+        examples:
+          - "Find agents that have monitoring capabilities"
+          - "Discover all available A2A skills in the cluster"
+          - "Generate agent card for external service discovery"
+      - id: a2a_skill_definition
+        name: "A2A Skill Definition & Management"
+        description: "Define new A2A skills with proper schema, validate skill definitions, and manage skill configuration on agents"
+        inputModes:
+          - application/json
+          - text/plain
+        outputModes:
+          - application/yaml
+          - application/json
+        tags:
+          - a2a
+          - skills
+          - definition
+          - configuration
+        examples:
+          - "Create a new A2A skill definition"
+          - "Validate that a skill meets protocol requirements"
+          - "Add a new skill to an existing agent"
+      - id: platform_resource_configuration
+        name: "Platform Resource Configuration"
+        description: "Configure platform-level resources including LLM ModelConfigs, MCP tool servers, and RBAC permissions"
+        inputModes:
+          - text/plain
+          - application/json
+        outputModes:
+          - application/yaml
+          - application/json
+        tags:
+          - platform
+          - configuration
+          - rbac
+          - infrastructure
+        examples:
+          - "Create a new ModelConfig for a different LLM provider"
+          - "List all available MCP tool servers"
+          - "Generate RBAC permissions for an agent"

@@ -52,6 +52,20 @@ CRITICAL: You operate in a human-in-the-loop mode. This means:
 - `apply_manifest`: Only after user says "yes", "apply", "approve", or similar
 - `delete_agent`: Only with explicit confirmation
 
+### A2A (Agent-to-Agent) Tools
+Discovery:
+- `list_agent_skills`: List A2A skills exposed by agents
+- `discover_a2a_agents`: Find agents that expose A2A skills
+- `get_agent_card`: Generate an A2A Agent Card for an agent
+
+Generation:
+- `create_skill_manifest`: Generate a skill definition
+- `add_skill_to_agent`: Add a skill to an agent's a2aConfig
+- `remove_skill_from_agent`: Remove a skill from an agent
+
+Validation:
+- `validate_skill`: Validate a skill against A2A spec
+
 ## System Prompt Best Practices
 
 When helping users write system prompts for their agents, follow these principles:
@@ -131,6 +145,30 @@ For HTTP/SSE servers:
 - `spec.protocol`: "STREAMABLE_HTTP" or "SSE"
 - `spec.timeout`: Request timeout
 - `spec.sseReadTimeout`: SSE read timeout
+
+### A2A Configuration (for Agent resources)
+Agents can expose skills for Agent-to-Agent communication:
+```yaml
+spec:
+  a2aConfig:
+    skills:
+      - id: unique-skill-id
+        name: Human Readable Name
+        description: What this skill does
+        inputModes:
+          - text/plain
+          - application/json
+        outputModes:
+          - application/json
+        tags:
+          - category1
+          - category2
+        examples:
+          - "Example use case 1"
+          - "Example use case 2"
+```
+
+A2A Agent Cards can be generated using `get_agent_card` to publish agent capabilities for discovery by other agents.
 
 ## Interaction Patterns
 

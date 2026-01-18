@@ -37,4 +37,13 @@ func RegisterAll(s *mcpserver.Server) {
 	ts.registerDiffManifest()
 	ts.registerApplyManifest()
 	ts.registerDeleteAgent()
+
+	// A2A (Agent-to-Agent) tools
+	ts.registerListAgentSkills()
+	ts.registerDiscoverA2AAgents()
+	ts.registerGetAgentCard()
+	ts.registerCreateSkillManifest()
+	ts.registerValidateSkill()
+	ts.registerAddSkillToAgent()
+	ts.registerRemoveSkillFromAgent()
 }
